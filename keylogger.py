@@ -32,6 +32,10 @@ from datetime import datetime
 import sys
 from zipfile import ZipFile
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Date and time formatter function
 
 def date_time_formatter(datetime_val):
@@ -163,9 +167,9 @@ with ZipFile(zipfile_full_path, 'w') as zipobj:
 
 subject = "LogFiles - " + str(sys_details.get('hostname')) + " " + str(sys_details.get('current_user')) + " - " + str(datetime.now())
 body = "Loren Ipsum"
-sender_email = os.environ['SENDER_EMAIL']
-recipient_email = os.environ['RECEIVER_EMAIL']
-sender_password = os.environ['SENDER_EMAIL_PWD']
+sender_email = os.getenv("SENDER_EMAIL")
+recipient_email = os.getenv("RECEIVER_EMAIL")
+sender_password = os.getenv("SENDER_EMAIL_PWD")
 smtp_server = 'smtp.gmail.com'
 smtp_port = 465
 path_to_file = zipfile_full_path

